@@ -44,6 +44,33 @@
         scene = new THREE.Scene();
 
     }
+    // 经纬度转墨卡托
+    function lonlatToMercator(lon,lat,height){
+        var z = height ? height:0;
+        var x = (lon / 180.0) * 20037508.3427892;
+        var y = (Math.PI / 180.0) * lat;
+        var tmp = Math.PI / 4.0 + y / 2.0;
+        y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
+        return {x: x,y: y,z: z};
+    }
+    const center = lonlatToMercator(116.648432,39.921648, window.innerHeight);
+    console.log(center)
+    // 墨卡托转three坐标
+    // function lonlatToThree(lon,lat,height){
+    //     var z = height? height:0;
+    //     var x = (lon / 180.0) * 20037508.3427892;
+    //     var y = (Math.PI / 180.0) * lat;
+    //     var tmp = Math.PI / 4.0 + y / 2.0;
+    //     y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
+    //     console.log(z, x, y)
+    //     var result = {
+    //         x: x - center.x,
+    //         y: y - center.y,
+    //         z: z -center.z
+    //     };
+    //     return result;
+    // }
+    // console.log(lonlatToThree(116.648432,39.921648, window.innerHeight))
 
     /* 相机 */
     function initCamera() {
@@ -55,7 +82,7 @@
         */
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); 
         // 设置相机位置
-        camera.position.set(0, 0, 5);
+        camera.position.set(80, 20, 5);
         // 看着原点方向
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
