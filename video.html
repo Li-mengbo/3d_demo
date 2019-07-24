@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>首页</title>
+  <!-- <script src="https://lib.baomitu.com/chimee-player/1.1.9/chimee-player.browser.js"></script> -->
+  <script src="//cdn.jsdelivr.net/npm/xgplayer@1.1.4/browser/index.js" charset="utf-8"></script>
+  <script src="//cdn.jsdelivr.net/npm/xgplayer-flv.js/browser/index.js" charset="utf-8"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body style="">
+    <!-- preload="auto"-->
+    <video id="myvideo" style="object-fit: fill; width: 750px; height: 1206px; z-index: 0;position:fixed " autoplay="autoplay" playsinline="true" webkit-playsinline="true" x-webkit-airplay="allow" airplay="allow" loop="loop" x5-video-player-type="h5" x5-video-player-fullscreen="true" x5-video-orientation="portrait" x-webkit-airplay="true" playsinline webkit-playsinline="true"  src="http://www.ajexoop.com/test/embedVideoTest/video/1.mp4" width="750" height="1206"></video>
+    <!--autoplay="autoplay"-->
+    <!--<canvas id="mycanvas" style="position: fixed" width="750" height="1206"></canvas>-->
+    <button id="mybutton" style="position: fixed;width: 200px;height: 100px;font-size: 30px" onclick="clickHandler()">测试</button>
+    <script src="http://static.m3guo.com/passport/v1/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script>
+        var u = navigator.userAgent;
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
+        var video =$("#myvideo")[0];
+        function clickHandler()
+        {
+            alert("播放")
+            video.play();
+        }
+    </script>
+    
+    <div id="cli_dialog_div"></div>
+  </body>
+</html>
