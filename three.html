@@ -15,6 +15,7 @@
     <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/stats.min.js"></script> -->
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/OrbitControls.js"></script>
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/loaders/GLTFLoader.js"></script>
+    <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/FirstPersonControls.js"></script> -->
     <style>
         #loading {
             position: fixed;
@@ -53,24 +54,24 @@
         y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
         return {x: x,y: y,z: z};
     }
-    const center = lonlatToMercator(116.648432,39.921648, window.innerHeight);
+    const center = lonlatToMercator(116.647047,39.921079, window.innerHeight);
     console.log(center)
     // 墨卡托转three坐标
-    // function lonlatToThree(lon,lat,height){
-    //     var z = height? height:0;
-    //     var x = (lon / 180.0) * 20037508.3427892;
-    //     var y = (Math.PI / 180.0) * lat;
-    //     var tmp = Math.PI / 4.0 + y / 2.0;
-    //     y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
-    //     console.log(z, x, y)
-    //     var result = {
-    //         x: x - center.x,
-    //         y: y - center.y,
-    //         z: z -center.z
-    //     };
-    //     return result;
-    // }
-    // console.log(lonlatToThree(116.648432,39.921648, window.innerHeight))
+    function lonlatToThree(lon,lat,height){
+        var z = height? height:0;
+        var x = (lon / 180.0) * 20037508.3427892;
+        var y = (Math.PI / 180.0) * lat;
+        var tmp = Math.PI / 4.0 + y / 2.0;
+        y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
+        console.log(z, x, y)
+        var result = {
+            x: x - center.x,
+            y: y - center.y,
+            z: z -center.z
+        };
+        return result;
+    }
+    console.log(lonlatToThree(116.647266,39.920474, window.innerHeight))
 
     /* 相机 */
     function initCamera() {
@@ -80,12 +81,9 @@
         * 近端渲染
         * 远端剪切平面可以看到多远
         */
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); 
-        // 设置相机位置
-        camera.position.set(80, 20, 5);
-        // 看着原点方向
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
-
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 10000);
+        // camera.position.set(14.7, 0.4, -16);
+         camera.position.set(24, 0, -87);
     }
 
     /* 渲染器 */
@@ -107,11 +105,22 @@
 
     /* 控制器 */
     function initControls() {
-
         controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-        /* 属性参数默认 */
-
+        // controls = new THREE.FirstPersonControls(camera);
+        // controls.lookSpeed = 0.1; //鼠标移动查看的速度
+        // controls.movementSpeed = 2; //相机移动速度
+        // controls.noFly = true;
+        // controls.constrainVertical = true; //约束垂直
+        // controls.verticalMin = 1.0;
+        // controls.verticalMax = 2.0;
+        // controls.lon = -100; //进入初始视角x轴的角度
+        // controls.lat = 0; //初始视角进入后y轴的角度
+        // controls.moveForward = false;
+        // controls.moveBackward = false;
+        // controls.moveLeft = false;
+        // controls.moveRight = false;
+        // controls.heightMin = 0.4;
+	    // controls.heightMax = 0.4;
     }
 
     /* 调试插件 */
@@ -134,7 +143,9 @@
         loader.load('http://47.92.118.208:8081/7201/7201.gltf',function (obj) {
 
             console.log(obj);
-            obj.scene.position.y = 1;
+            obj.scene.position.y = 0;
+            obj.scene.position.x = 0;
+            obj.scene.position.z = 0;
             scene.add(obj.scene);
             document.getElementById('loading').style.display = 'none';
 
@@ -181,8 +192,8 @@
     function init() {
 
         initScene();
-        initCamera();
         initRender();
+        initCamera();
         initLight();
         initControls();
         initContent();
@@ -192,10 +203,10 @@
         window.addEventListener('resize', onWindowResize, false);
 
     }
-
+    var clock = new THREE.Clock();
     /* 循环渲染 */
     function animate() {
-
+        controls.update(clock.getDelta());
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
         // update();
