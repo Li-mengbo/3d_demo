@@ -54,7 +54,7 @@
         y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
         return {x: x,y: y,z: z};
     }
-    const center = lonlatToMercator(116.647047,39.921079, window.innerHeight);
+    const center = lonlatToMercator(116.647476,39.920434, window.innerHeight);
     console.log(center)
     // 墨卡托转three坐标
     function lonlatToThree(lon,lat,height){
@@ -71,7 +71,7 @@
         };
         return result;
     }
-    console.log(lonlatToThree(116.647266,39.920474, window.innerHeight))
+    console.log(lonlatToThree(116.647937,39.920966, window.innerHeight))
 
     /* 相机 */
     function initCamera() {
@@ -83,7 +83,9 @@
         */
         camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 10000);
         // camera.position.set(14.7, 0.4, -16);
-         camera.position.set(24, 0, -87);
+        camera.position.set(0, 0.4, 0);
+        // camera.up.set(0,0,0); //默认Y轴向上
+        // camera.lookAt(new THREE.Vector3(0,0,0)); //虽然没用，但此句要跟在up 设置后 因为lookat调用了 up
     }
 
     /* 渲染器 */
@@ -140,12 +142,11 @@
         // 加载 glTF 格式的模型
         let loader = new THREE.GLTFLoader();/*实例化加载器*/
 
-        loader.load('http://47.92.118.208:8081/7201/7201.gltf',function (obj) {
-
-            console.log(obj);
+        loader.load('http://47.92.118.208:8081/7301/7301.gltf',function (obj) {
             obj.scene.position.y = 0;
             obj.scene.position.x = 0;
             obj.scene.position.z = 0;
+            console.log(obj)
             scene.add(obj.scene);
             document.getElementById('loading').style.display = 'none';
 
@@ -188,6 +189,26 @@
 
     // }
 
+    /* 显示坐标轴 */
+    function axes() {
+        var axes = new THREE.AxisHelper(10);
+        // axes.position.y = 54;
+        console.log(axes)
+        /**
+         * 立方体世界坐标转屏幕坐标
+        */
+        //获取网格模型boxMesh的世界坐标
+        var worldVector = new THREE.Vector3(
+            0,
+            10,
+            10
+            );
+        console.log(1111, worldVector)    
+        var standardVector = worldVector.project(camera);
+        console.log(1111, standardVector)
+        scene.add(axes);
+    }
+
     /* 初始化 */
     function init() {
 
@@ -198,8 +219,9 @@
         initControls();
         initContent();
         // initGui();
-
+        axes();
         /* 监听事件 */
+ 
         window.addEventListener('resize', onWindowResize, false);
 
     }
