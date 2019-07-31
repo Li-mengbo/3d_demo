@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>加载glTF格式的文件</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* 溢出隐藏 */
+        }
+    </style>
+    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/three.js"></script>
+    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/Detector.js"></script>
+    <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/dat.gui.min.js"></script> -->
+    <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/stats.min.js"></script> -->
+    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/OrbitControls.js"></script>
+    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/loaders/GLTFLoader.js"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8"></script>
+    <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/FirstPersonControls.js"></script> -->
+    <style>
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            color: #000;
+            font-size: 20px;
+            margin-top: -30px;
+            margin-left: -40px;
+        }
+    </style>
+</head>
+<body>
+<!-- <p id="loading">loading......</p> -->
+<script>
+  function Calculation(maxX, minX, maxY, minY, x) {
+    const a = (maxY - minY) / (maxX - minX);
+    const b = (maxY - maxX * a);
+    return a * x + b;
+  }
+  console.log('.',Calculation(10, 1, 116.648586, 116.64945, 10))
+  console.log('.',Calculation(18,10,39.921651,39.919688,18))
+  console.log(Calculation(10, 1, 116.648586, 116.64945, 116.648586))
+  console.log(Calculation(18,10,39.921651,39.919688,39.919688))
+    /* 必须有的值
+    * scene 场景
+    * camera 相机
+    * renderer 渲染器 
+    */ 
+    let scene1, camera1, renderer, controls, guiControls;
+    // let stats = initStats();
+
+    /* 创建场景 */
+    function initScene() {
+        scene1 = new THREE.Scene();
+    }
+
+    /* 相机 */
+    function initCamera() {
+        /*
+        * 视野
+        * 宽高比
+        * 近端渲染
+        * 远端剪切平面可以看到多远
+        */
+        camera1 = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 10000);
+        // camera1.position.x = 0;
+        // camera1.position.y = 30;
+        // camera1.position.z = 30;
+        camera1.position.set(1, 0, -18)
+        // camera1.lookAt(scene1.position);
+    }
+
+    /* 渲染器 */
+    function initRender() {
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xffffff);
+        document.body.appendChild(renderer.domElement);
+
+    }
+
+    /* 灯光 */
+    function initLight() {
+
+        scene1.add(new THREE.AmbientLight(0xffffff));
+
+    }
+
+    /* 控制器 */
+    function initControls() {
+        controls = new THREE.OrbitControls(camera1, renderer.domElement);
+        controls.target.set(0, 0, 0);
+        controls.maxDistance = 400;
+        controls.minDistance = 10;
+        controls.update();
+        // controls = new THREE.FirstPersonControls(camera);
+        // controls.lookSpeed = 0.1; //鼠标移动查看的速度
+        // controls.movementSpeed = 2; //相机移动速度
+        // controls.noFly = true;
+        // controls.constrainVertical = true; //约束垂直
+        // controls.verticalMin = 1.0;
+        // controls.verticalMax = 2.0;
+        // controls.lon = -100; //进入初始视角x轴的角度
+        // controls.lat = 0; //初始视角进入后y轴的角度
+        // controls.moveForward = false;
+        // controls.moveBackward = false;
+        // controls.moveLeft = false;
+        // controls.moveRight = false;
+        // controls.heightMin = 0.4;
+	    // controls.heightMax = 0.4;
+    }
+
+    /* 场景中的内容 */
+    function initContent() {
+
+        // 加载 glTF 格式的模型
+        let loader = new THREE.GLTFLoader();/*实例化加载器*/
+
+        loader.load('http://47.92.118.208:8081/7311/7311.gltf',function (obj) {
+            // obj.scene.position.y = 0;
+            // obj.scene.position.x = 0;
+            // obj.scene.position.z = 0;
+            scene1.add(obj.scene);
+            // document.getElementById('loading').style.display = 'none';
+
+        },function (xhr) {
+
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+        },function (error) {
+
+            console.log('load error!'+error.getWebGLErrorMessage());
+
+        })
+
+    }
+
+    /* 窗口变动触发 */
+    function onWindowResize() {
+
+        camera1.aspect = window.innerWidth / window.innerHeight;
+        camera1.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    /* 显示坐标轴 */
+    function axes() {
+        var axes = new THREE.AxisHelper(10);
+        scene1.add(axes);
+    }
+
+    /* 初始化 */
+    function init() {
+
+        initScene();
+        initRender();
+        initCamera();
+        initLight();
+        initControls();
+        initContent();
+        // initGui();
+        axes();
+        /* 监听事件 */
+ 
+        window.addEventListener('resize', onWindowResize, false);
+
+    }
+    var clock = new THREE.Clock();
+    /* 循环渲染 */
+    function animate() {
+        controls.update(clock.getDelta());
+        requestAnimationFrame(animate);
+        renderer.render(scene1, camera1);
+
+    }
+
+    /* 初始加载 */
+    (function () {
+        console.log("three init start...");
+
+        init();
+        animate();
+
+        console.log("three init send...");
+    })();
+
+    //切图在scene中的大小
+    var tileSize = 50;
+    //地图切片服务地址
+    var serverURL = "http://c.tile.osm.org/";
+    //设置中心经纬度
+    var centerLng = 0, centerLat = 0;
+    
+    //WGS84转Web墨卡托
+    //参考：http://www.opengsc.com/archives/137
+    function LonLat2WebMercator(lng, lat) {
+        var x = (lng / 180.0) * 20037508.3427892;
+        var y;
+        if (lat > 85.05112) {
+            lat = 85.05112;
+        }
+        if (lat < -85.05112) {
+            lat = -85.05112;
+        }
+        y = (Math.PI / 180.0) * lat;
+        var tmp = Math.PI / 4.0 + y / 2.0;
+        y = 20037508.3427892 * Math.log(Math.tan(tmp)) / Math.PI;
+        var result = {
+            x: x,
+            y: y
+        };
+        return result;
+    }
+    
+    //Web墨卡托转成tile上的像素坐标，返回像素坐标，以及tile编号，在所在tile上的偏移
+    function WebMercator2Tileimage(x,y){
+        //对于第18级地图, 对于我国而言
+        var level = 18;
+        var r = 20037508.3427892;
+        y = r - y;
+        x = r + x;
+        var size = Math.pow(2, level) * 256;
+        var imgx = x * size / (r * 2);
+        var imgy = y * size / (r * 2);
+        //当前位置在全球切片编号
+        var col = Math.floor(imgx / 256);
+        var row = Math.floor(imgy / 256);
+        console.log("col", col, "row", row);
+        //当前位置对应于tile图像中的位置
+        var imgdx = imgx % 512;
+        var imgdy = imgy % 512;
+        
+        //像素坐标
+        var position = {x:imgx,y:imgy};
+        //tile编号
+        var tileinfo = {x:col,y:row,level:18};
+        //在所在tile上的偏移
+        var offset = {x:imgdx,y:imgdy};
+        
+        var result = {position:position,tileinfo:tileinfo,offset:offset};
+        return result;
+    }
+    
+    //经纬度到tile，再到WebGL坐标
+    function LonLat2WebGL(lng,lat){
+        var webMercator = LonLat2WebMercator(lng,lat);
+        var tilePos = WebMercator2Tileimage(webMercator.x,webMercator.y).position;
+        var centerWM = LonLat2WebMercator(centerLng,centerLat);
+        var centerTP = WebMercator2Tileimage(centerWM.x,centerWM.y);
+        console.log(centerTP)
+        console.log(centerTP.offset.x, centerTP.offset.y);
+        console.log('转出坐标', (centerTP.offset.x - 512/2)*tileSize/512, (-centerTP.offset.y + 512/2)*tileSize/512)
+        //相对偏移修正（以centerLng,centerLat所在点tile中心点为原点，导致的偏移）
+        var x = (tilePos.x - centerTP.position.x + (centerTP.offset.x - 256/2) )*tileSize/256;
+        var y = (tilePos.y - centerTP.position.y + (-centerTP.offset.y + 256/2))*tileSize/256;
+        
+        var result = {
+            x: x,
+            y: y
+        };
+        return result;        		
+    }
+    /**
+		 * 加载一个切图
+		 * @param {Object} xno tile编号x
+		 * @param {Object} yno tile编号y
+		 * @param {Object} callback
+		*/
+    function loadImageTile(xno, yno, callback) {
+          var level = 18;
+          var url = serverURL + level + "/" + xno + "/" + yno + ".png";
+          var loader = new THREE.TextureLoader();
+          //跨域加载图片
+          loader.crossOrigin = true;
+          loader.load(url, function(texture) {
+              console.log("loaded tile");
+              var geometry = new THREE.PlaneGeometry(tileSize,tileSize,1);
+              var material = new THREE.MeshBasicMaterial({
+                  map: texture,
+                  transparent: true,
+                  side: THREE.DoubleSide//双面显示
+              });
+              var mesh = new THREE.Mesh(geometry,material);
+              callback(mesh);
+          });
+      }
+      /**
+      * 将加载的切图放到scene
+      * @param {Object} mesh
+      * @param {Object} x坐标  WebGL坐标
+      * @param {Object} y坐标
+		 */
+     function addTileToScene(mesh, x, y) {
+        //mesh的中心位置
+        mesh.position.x = x;
+        mesh.position.y = y;
+        scene2.add(mesh);
+     }
+    /**
+		 * 辅助函数，用于计算tile应该放在何处
+		 * @param {Object} dx  tile间相对位置，也就是编号差
+		 * @param {Object} dy
+		*/
+    function addTileToSceneHelper(dx, dy) {
+      var x = tileSize * dx ;
+      var y = -tileSize * dy ;
+      return function(mesh) {
+          addTileToScene(mesh, x, y)
+      }
+    } 
+    /**
+		 * 加载地图
+		 * @param {Object} centerX 地图中间的切图编号
+		 * @param {Object} centerY 地图中间的切图编号
+		*/
+    function loadMap(centerX, centerY) {
+      var radius = 5;
+      for (var i = centerX - radius; i <= centerX + radius; i++) {
+          for (var j = centerY - radius; j <= centerY + radius; j++) {
+              //console.log("try to load",i,j,i-centerX,j-centerY);
+              console.log("try to load");
+              loadImageTile(i, j, addTileToSceneHelper(i - centerX, j - centerY));
+          }
+      }
+    }
+  /**
+    * 标记出当前位置
+    * @param {Object} x webGL坐标
+    * @param {Object} y
+  */
+  function markCurrentPosition(x, y) {
+    var geometry = new THREE.SphereGeometry();
+    var material = new THREE.MeshBasicMaterial({
+        color: 0xff0000
+    });
+    var mesh = new THREE.Mesh(geometry,material);
+    console.log(x, y)
+    mesh.position.x = 0;
+    mesh.position.z = 0;
+    // scene1.add(mesh);
+  } 
+
+  function main() {
+    // 116.647053,39.920921
+    // 116.646865,39.920588
+    // 116.647053,39.920911
+    // 116.647166,39.920913
+    // 116.64708,39.920493
+    // 116.648458,39.920892
+    // 116.648485,39.920596
+    // 116.647054,39.920911
+    // 116.648586,39.921651
+    // 116.64945,39.919688
+    var lng = 116.64945;
+    var lat = 39.919688;
+    // console.log("current position in world", lat, lng);
+    centerLat = lat;
+    centerLng = lng;
+
+    // var webMercator = LonLat2WebMercator(lng, lat);
+    // var tilePos = WebMercator2Tileimage(webMercator.x,webMercator.y);
+        
+    //以centerLng所在点tile中心点为中心，加载tile
+    // loadMap(tilePos.tileinfo.x, tilePos.tileinfo.y);
+    
+    //标记当前位置
+    var currentWebGLPos = LonLat2WebGL(lng, lat);
+    markCurrentPosition(currentWebGLPos.x,currentWebGLPos.y);
+
+  }
+  main();               
+</script>
+</body>
+</html>
+

@@ -61,6 +61,12 @@
         document.getElementById('status').innerHTML='定位失败'
         document.getElementById('result').innerHTML = '失败原因排查信息:'+data.message;
     }
+    var lnglat = [116.647063,39.920942];
+    // 返回 3D 坐标系下的 Pixel
+    var coord = map.lngLatToGeodeticCoord(lnglat);
+    var pixel = map.lnglatToPixel([116.647063,39.920942], 18); // 返回 Pixel 对象
+    console.log(coord)
+    console.log(pixel)
 </script>
 </body>
 </html>
