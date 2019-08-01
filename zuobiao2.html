@@ -191,6 +191,25 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
 
         }
+        function unid(arr){
+            var arr1 = (arr + '').split(',');//将数组转字符串后再以逗号分隔转为数组
+            var arr2 = arr1.map(function(x){
+                return Number(x);
+            });
+            return arr2;
+        }
+        function erwei(baseArray) {
+            let len = baseArray.length;
+            let n = 2; //假设每行显示4个
+            let lineNum = len % n === 0 ? len / n : Math.floor( (len / n) + 1 );
+            let res = [];
+            for (let i = 0; i < lineNum; i++) {
+                // slice() 方法返回一个从开始到结束（不包括结束）选择的数组的一部分浅拷贝到一个新数组对象。且原始数组不会被修改。
+                let temp = baseArray.slice(i*n, i*n+n);
+                res.push(temp);
+            }
+            return res;
+        }
 
         /* 设置中心显示坐标轴 红色为x 蓝色为z */
         function axes() {
@@ -211,17 +230,21 @@
                     console.log(result.routes[0].steps)
                     const steps = result.routes[0].steps;
                     steps.forEach((item, index) => {
-                        stepsList.push([]);
-                        const x = CalculationX(item.end_location.lng);
-                        const z = CalculationZ(item.end_location.lat);
-                        console.log(x, z)
-                        stepsList[index].push(x)
-                        stepsList[index].push(z)
+                        let arr = [];
+                        if(item.path) {
+                            item.path.forEach((items, index) => {
+                                const x = CalculationX(items.lng);
+                                const z = CalculationZ(items.lat);
+                                arr.push([x, z])
+                            })
+                        }
+                        stepsList.push(arr)
                         // arr.push(item.end_location.lat)
                         // arr.push(item.end_location.lng)
                     });
-                    console.log(stepsList)
-                    stepsList.forEach(item => {
+                    const uuidArr = unid(stepsList);
+                    const erweiArr = erwei(uuidArr); 
+                    erweiArr.forEach(item => {
                         // 给空白几何体添加点信息，这里写3个点，geometry会把这些点自动组合成线，面。
                         geometry.vertices.push(new THREE.Vector3(-item[0],0,-item[1]));
                     })
