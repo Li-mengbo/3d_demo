@@ -19,24 +19,26 @@
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/loaders/GLTFLoader.js"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.PolyEditor"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.Walking"></script>
-    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/FirstPersonControls.js"></script>
-    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/PointerLockControls.js"></script>
+    <script src="http://47.92.118.208:8081/js/FirstPersonControls.js"></script>
     <style>
-        #loading {
+        #loading, #arrow {
             position: fixed;
             top: 50%;
             left: 50%;
             color: #000;
-            font-size: 20px;
+            font-size: 60px;
             margin-top: -30px;
             margin-left: -40px;
+            color: red;
         }
     </style>
 </head>
 
 <body>
     <p id="loading">loading......</p>
+    <div id="three"></div>
     <div id='container'></div>
+    <div id="arrow"></div> 
     <script>
         /*传入经度，返回基于模型的X坐标点
          *@param longitude
@@ -49,7 +51,7 @@
          function CalculationX(x) {
             const a = (-0.1 - 40.2) / (116.64861023 - 116.64481759);
             const b = (-0.1 - 116.64861023 * a);
-            return a * x + b;
+            return -(a * x + b);
         }
 
         /*传入纬度,返回基于模型的Z坐标点
@@ -59,7 +61,7 @@
         function CalculationZ(z) {
             const a = (16.5 - -8.7) / (39.92165992 - 39.91972215);
             const b = (16.5 - 39.92165992 * a);
-            return a * z + b;
+            return -(a * z + b);
         }
         // 116.646901,39.919333 五号楼
         // 116.648108,39.92003 三号楼
@@ -69,8 +71,13 @@
         // console.log(CalculationX(116.648108))
         // console.log(CalculationZ(39.92003))
         // 五号楼坐标
-        let x = CalculationX(116.646901);
-        let z = CalculationZ(39.919333);
+        // let x = CalculationX(116.646901);
+        // let z = CalculationZ(39.919333);
+        // console.log(CalculationX(116.646901))
+        // console.log(CalculationZ(39.919333))
+        //北门 116.64861023,39.92165992
+        let x = CalculationX(116.64861023);
+        let z = CalculationZ(39.92165992);
         console.log(CalculationX(116.646901))
         console.log(CalculationZ(39.919333))
         const stepsList = [];
@@ -86,7 +93,7 @@
          * camera 相机
          * renderer 渲染器 
          */
-        let scene1, camera1, renderer, controls, guiControls;
+        let scene1, camera1, renderer, controls, guiControls, mesh, path, curve, progress=0;
         // let stats = initStats();
 
         /* 创建场景 */
@@ -104,10 +111,10 @@
              */
             camera1 = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
             // 默认相机坐标
-            camera1.position.set(0, 45, 0)
+            // camera1.position.set(0, 45, 0)
             // 修改相机坐标
-            // camera1.position.set(x, 0, z)
-            // camera1.lookAt(new THREE.Vector3(x,0,y))
+            camera1.position.set(x, .2, z)
+            // camera1.lookAt(new THREE.Vector3(20, 0.5, 20))
             // camera1.lookAt(scene1.position);
         }
 
@@ -119,7 +126,7 @@
             });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(0xffffff);
-            document.body.appendChild(renderer.domElement);
+            document.getElementById('three').appendChild(renderer.domElement);
 
         }
 
@@ -132,28 +139,22 @@
 
         /* 控制器 */
         function initControls() {
-            controls = new THREE.OrbitControls(camera1, renderer.domElement);
+            // controls = new THREE.OrbitControls(camera1, renderer.domElement);
+            // controls.target.set(0, 0, -1)
             // controls.enableDamping = true
             // controls.target.set(0, 0, 0);
             // controls.maxDistance = 100;
             // controls.minDistance = 10;
             // controls.update();
             // 第一人称相机控制器
-            // controls = new THREE.FirstPersonControls(camera1);
-            // controls.lookSpeed = 0.1; //鼠标移动查看的速度
-            // controls.movementSpeed = 2; //相机移动速度
-            // controls.noFly = true;
+            controls = new THREE.FirstPersonControls(camera1);
+            controls.movementSpeed = 300; //相机移动速度
+            controls.noFly = true;
             // controls.constrainVertical = true; //约束垂直
             // controls.verticalMin = 1.0;
             // controls.verticalMax = 2.0;
-            // controls.lon = -100; //进入初始视角x轴的角度
             // controls.lat = 0; //初始视角进入后y轴的角度
-            // controls.moveForward = false;
-            // controls.moveBackward = false;
-            // controls.moveLeft = false;
-            // controls.moveRight = false;
-            // controls.heightMin = 0.4;
-            // controls.heightMax = 0.4;
+            controls.lon = 90;
         }
 
         /* 场景中的内容 */
@@ -216,9 +217,10 @@
             var axes = new THREE.AxisHelper(10);
             scene1.add(axes);
             //定义材质THREE.LineBasicMaterial . MeshBasicMaterial...都可以
-            var material = new THREE.LineBasicMaterial({color:0x0000ff});
+            // var material = new THREE.LineBasicMaterial({color:0x0000ff});
             // 空几何体，里面没有点的信息,不想BoxGeometry已经有一系列点，组成方形了。
-            var geometry = new THREE.Geometry();
+            // var geometry = new THREE.Geometry();
+            curve = new THREE.CatmullRomCurve3();
             //步行导航
             var walking = new AMap.Walking({
                 map: map
@@ -235,7 +237,7 @@
                             item.path.forEach((items, index) => {
                                 const x = CalculationX(items.lng);
                                 const z = CalculationZ(items.lat);
-                                arr.push([x, z])
+                                arr.push([-x, -z])
                             })
                         }
                         stepsList.push(arr)
@@ -246,13 +248,30 @@
                     const erweiArr = erwei(uuidArr); 
                     erweiArr.forEach(item => {
                         // 给空白几何体添加点信息，这里写3个点，geometry会把这些点自动组合成线，面。
-                        geometry.vertices.push(new THREE.Vector3(-item[0],0,-item[1]));
+                        // geometry.vertices.push(new THREE.Vector3(-item[0],0,-item[1]));
+                        curve.points.push(new THREE.Vector3(-item[0], 0, -item[1]))
                     })
-                    geometry.vertices.push(new THREE.Vector3(-x,0,-z));
+                    curve.points.push(new THREE.Vector3(x, 0, z))
+                    var tubeGeometry = new THREE.TubeGeometry(curve, 100, 0.6, 50, false);
+                    var textureLoader = new THREE.TextureLoader();
+                    var texture = textureLoader.load('http://47.92.118.208:8081/01.png');
+                    texture.wrapS = THREE.RepeatWrapping
+                    texture.wrapT=THREE.RepeatWrapping
+                    // 设置x方向的偏移(沿着管道路径方向)，y方向默认1
+                    //等价texture.repeat= new THREE.Vector2(20,1)
+                    texture.repeat.x = 20;
+                    var tubeMaterial = new THREE.MeshPhongMaterial({
+                    map: texture,
+                    transparent: true,
+                    });
+                    var tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+                    scene1.add(tube)
+                    // geometry.vertices.push(new THREE.Vector3(x,0,z));
+                    
                     //线构造
-                    var line=new THREE.Line(geometry,material);
+                    // var line=new THREE.Line(geometry,material);
                     // 加入到场景中
-                    scene1.add(line);  
+                    // scene1.add(line);  
                     // log.success('绘制步行路线完成')
                 } else {
                     console.log('失败')
@@ -260,7 +279,27 @@
                 } 
             });
         }
-
+        /* 加载图片 */
+        function loadImg() {
+            //模型大门的坐标为(x=-0.1,z=16.5,116.64861023,39.92165992)
+          // 116.647605,39.919496
+          // 116.64856,39.921263
+            const x = CalculationX(116.64856);
+            const z = CalculationZ(39.921263);
+            var skyBoxGeometry = new THREE.PlaneGeometry(); 
+            var texture = new THREE.TextureLoader().load('http://47.92.118.208:8081/01.png');
+            var material = new THREE.MeshBasicMaterial({
+                    map: texture
+            });
+            mesh = new THREE.Mesh(skyBoxGeometry, material);
+            mesh.position.y = 0;
+            mesh.position.x = x;
+            mesh.position.z = z;
+            mesh.rotation.x = -1.5;
+            mesh.rotation.y = 0;
+            // mesh.rotation.z = 1.57 * 4;
+            scene1.add(mesh);
+        }
         /* 初始化 */
         function init() {
 
@@ -269,6 +308,8 @@
             initCamera();
             initLight();
             initControls();
+            loadImg();
+
             initContent();
             // initGui();
             axes();
@@ -282,10 +323,35 @@
         function animate() {
             controls.update(clock.getDelta());
             requestAnimationFrame(animate);
+            if(progress>1.0){
+                return;    //停留在管道末端,否则会一直跑到起点 循环再跑
+            }
+            // if (curve.points.length > 0) {
+            //     progress += 0.0009;
+            //     let point = curve.getPoint(progress);
+            //     if (point&&point.x) {
+            //         mesh.position.set(point.x,point.y,point.z);
+            //     }
+            // }
             renderer.render(scene1, camera1);
 
         }
-
+        try {  
+            var text = "";  
+            window.addEventListener("deviceorientation", orientationHandler, false);  
+            function orientationHandler(event) {  
+                text = ""  
+                var arrow = document.getElementById("arrow");  
+                text += "左右旋转：rotate alpha{" + Math.round(event.alpha) + "deg)<br>";  
+                text += "前后旋转：rotate beta{" + Math.round(event.beta) + "deg)<br>";  
+                text += "扭转设备：rotate gamma{" + Math.round(event.gamma) + "deg)<br>";  
+                arrow.innerHTML = text;  
+                mesh.rotation.z = Math.round(event.alpha) * 6 / 360;
+            }  
+        }  
+        catch (e) {  
+            document.getElementById("arrow").innerHTML(e.message)  
+        }
         /* 初始加载 */
         (function () {
             console.log("three init start...");
