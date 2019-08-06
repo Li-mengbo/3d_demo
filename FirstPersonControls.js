@@ -14,7 +14,7 @@ THREE.FirstPersonControls = function (object, domElement) {
     this.enabled = true;
 
     this.movementSpeed = 1.0;
-    this.lookSpeed = 0.005;
+    this.lookSpeed = 1;
 
     this.lookVertical = true;
     this.autoForward = false;
@@ -48,7 +48,14 @@ THREE.FirstPersonControls = function (object, domElement) {
     this.mouseDragOn = false;
 
     this.viewHalfX = 0;
-    this.viewHalfY = 0;
+	this.viewHalfY = 0;
+	
+	this.startX = 0;    //  手指开始滑动的位置  
+	this.startY = 0;  
+	this.distanceX = 0;   // 手指总共滑动的距离(滑动距离的叠加)  
+	this.distanceY = 0;    
+	this.moveX = 0;  // 手指滑动的距离  
+	this.moveY = 0;  
 
     this.moveEnd = true;
 
@@ -131,19 +138,32 @@ THREE.FirstPersonControls = function (object, domElement) {
     };
 
     this.onMouseMove = function (event) {
-        var pageX = event.touches[0].clientX;
-        var pageY =  event.touches[0].clientY;
+		this.moveEnd = true;
+		this.moveX = event.touches[0].clientX - this.startX;
+		if(this.moveX > 70) {
+			this.moveX = 70;
+		}else if(this.moveX < -70) {
+			this.moveX = -70;
+		}
+		  
+		this.moveY = event.touches[0].clientY - this.startY;  
+		if(this.moveY > 70) {
+			this.moveY = 70;
+		}else if(this.moveY < -70) {
+			this.moveY = -70;
+		}
         // debugger;
-        if(pageX && pageY) {
+        if(this.moveX && this.moveY ) {
             if (this.domElement === document) {
 
-                this.mouseX = pageX - this.viewHalfX;
-                this.mouseY = pageY - this.viewHalfY;
+                this.mouseX = this.moveX;
+                this.mouseY = this.moveY;
     
             } else {
-    
-                this.mouseX = pageX - this.domElement.offsetLeft - this.viewHalfX;
-                this.mouseY = pageY - this.domElement.offsetTop - this.viewHalfY;
+				this.mouseX = this.moveX;
+                this.mouseY = this.moveY;
+                // this.mouseX = pageX - this.domElement.offsetLeft - this.viewHalfX;
+                // this.mouseY = pageY - this.domElement.offsetTop - this.viewHalfY;
     
             }
         }
@@ -231,11 +251,14 @@ THREE.FirstPersonControls = function (object, domElement) {
 
     };
 
-    this.onTouchStart = function(event) {
-        this.moveEnd = true;  
+    this.onTouchStart = function(event) { 
+		this.startX = event.touches[0].clientX;  
+		this.startY = event.touches[0].clientY;     
     };
 
     this.onTouchEnd = function(event) {
+		this.distanceX = this.distanceX + this.moveX;   //  记录/更新手指总共滑动的距离  
+		this.distanceY = this.distanceY + this.moveY;  
         this.moveEnd = false;
     }
 
@@ -284,7 +307,11 @@ THREE.FirstPersonControls = function (object, domElement) {
 
         }
 
-        this.lon += this.mouseX * actualLookSpeed;
+		this.lon += this.mouseX * actualLookSpeed;
+		// if(this.lon>3000){
+		// 	console.log(this.lon)
+		// }
+		console.log(this.mouseX)
         if (this.lookVertical) this.lat -= this.mouseY * actualLookSpeed * verticalLookRatio;
 
         this.lat = Math.max(-85, Math.min(85, this.lat));

@@ -16,10 +16,12 @@
     <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/dat.gui.min.js"></script> -->
     <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/stats.min.js"></script> -->
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/OrbitControls.js"></script>
+    <!-- <script src="./OrbitControlsTwo.js"></script> -->
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/loaders/GLTFLoader.js"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.PolyEditor"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.Walking"></script>
-    <script src="http://47.92.118.208:8081/js/FirstPersonControls.js"></script>
+    <!-- <script src="http://47.92.118.208:8081/js/FirstPersonControls.js"></script> -->
+    <script src="./FirstPersonControls.js"></script>
     <style>
         #loading, #arrow {
             position: fixed;
@@ -111,9 +113,9 @@
              */
             camera1 = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
             // 默认相机坐标
-            // camera1.position.set(0, 45, 0)
+            camera1.position.set(0, 45, 0)
             // 修改相机坐标
-            camera1.position.set(x, .2, z)
+            // camera1.position.set(x, .2, z)
             // camera1.lookAt(new THREE.Vector3(20, 0.5, 20))
             // camera1.lookAt(scene1.position);
         }
@@ -139,22 +141,23 @@
 
         /* 控制器 */
         function initControls() {
-            // controls = new THREE.OrbitControls(camera1, renderer.domElement);
-            // controls.target.set(0, 0, -1)
-            // controls.enableDamping = true
-            // controls.target.set(0, 0, 0);
-            // controls.maxDistance = 100;
-            // controls.minDistance = 10;
+            controls = new THREE.OrbitControls(camera1, renderer.domElement);
+            controls.target.set(0, 0, -1)
+            controls.enableDamping = true
+            controls.target.set(0, 0, 0);
+            controls.maxDistance = 100;
+            controls.minDistance = 10;
+            // controls.enableRotate = false;
             // controls.update();
             // 第一人称相机控制器
-            controls = new THREE.FirstPersonControls(camera1);
-            controls.movementSpeed = 300; //相机移动速度
-            controls.noFly = true;
+            // controls = new THREE.FirstPersonControls(camera1);
+            // controls.movementSpeed = 30000; //相机移动速度
+            // controls.noFly = true;
             // controls.constrainVertical = true; //约束垂直
             // controls.verticalMin = 1.0;
             // controls.verticalMax = 2.0;
             // controls.lat = 0; //初始视角进入后y轴的角度
-            controls.lon = 90;
+            // controls.lon = 90;
         }
 
         /* 场景中的内容 */
