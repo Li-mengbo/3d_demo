@@ -15,8 +15,8 @@
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/Detector.js"></script>
     <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/dat.gui.min.js"></script> -->
     <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/libs/stats.min.js"></script> -->
-    <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/OrbitControls.js"></script>
-    <!-- <script src="./OrbitControlsTwo.js"></script> -->
+    <!-- <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/controls/OrbitControls.js"></script> -->
+    <script src="./OrbitControlsTwo.js"></script>
     <script src="http://a.amap.com/jsapi_demos/static/demo-center/model/js/loaders/GLTFLoader.js"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.PolyEditor"></script>
     <script src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.Walking"></script>
@@ -141,12 +141,13 @@
 
         /* 控制器 */
         function initControls() {
-            controls = new THREE.OrbitControls(camera1, renderer.domElement);
+            controls = new THREE.OrbitControlsTwo(camera1, renderer.domElement);
             controls.target.set(0, 0, -1)
             controls.enableDamping = true
             controls.target.set(0, 0, 0);
             controls.maxDistance = 100;
             controls.minDistance = 10;
+            controls.screenSpacePaning = true;
             // controls.enableRotate = false;
             // controls.update();
             // 第一人称相机控制器
@@ -166,7 +167,7 @@
             // 加载 glTF 格式的模型
             let loader = new THREE.GLTFLoader(); /*实例化加载器*/
 
-            loader.load('http://47.92.118.208:8081/7311/7311.gltf', function (obj) {
+            loader.load('http://47.92.118.208:8081/school8.7/school8.7.gltf', function (obj) {
                 console.log(obj)
                 // 修改位置坐标
                 obj.scene.position.y = 0;
@@ -296,8 +297,8 @@
             });
             mesh = new THREE.Mesh(skyBoxGeometry, material);
             mesh.position.y = 0;
-            mesh.position.x = x;
-            mesh.position.z = z;
+            mesh.position.x = 32;
+            mesh.position.z = -33.76;
             mesh.rotation.x = -1.5;
             mesh.rotation.y = 0;
             // mesh.rotation.z = 1.57 * 4;
