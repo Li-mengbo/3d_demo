@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>浏览器精确定位</title>
+      <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        html,body,#container{
+            height:100%;
+        }
+        .info{
+            width:26rem;
+        }
+    </style>
+<body>
+<div id='container'></div>
+<div class="info">
+    <h4 id='status'></h4><hr>
+    <p id='result'></p><hr>
+    <p >由于众多浏览器已不再支持非安全域的定位请求，为保位成功率和精度，请升级您的站点到HTTPS。</p>
+</div>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=35d07dbc5cf281a1bcfe8eb168b815c8&plugin=AMap.Walking"></script>
+<script type="text/javascript">
+    let stepsList = [];
+    var map = new AMap.Map('container', {
+        resizeEnable: true,
+        center: [116.64863,39.920623],//地图中心点
+        zoom: 18 //地图显示的缩放级别
+    });
+    //步行导航
+    var walking = new AMap.Walking({
+        map: map
+    }); 
+    function unid(arr){
+        var arr1 = (arr + '').split(',');//将数组转字符串后再以逗号分隔转为数组
+        console.log(arr1)
+        var arr2 = arr1.map(function(x){
+            return Number(x);
+        });
+        return arr2;
+    }
+    function erwei(baseArray) {
+        let len = baseArray.length;
+        let n = 2; //假设每行显示4个
+        let lineNum = len % n === 0 ? len / n : Math.floor( (len / n) + 1 );
+        let res = [];
+        for (let i = 0; i < lineNum; i++) {
+            // slice() 方法返回一个从开始到结束（不包括结束）选择的数组的一部分浅拷贝到一个新数组对象。且原始数组不会被修改。
+            let temp = baseArray.slice(i*n, i*n+n);
+            res.push(temp);
+        }
+        return res;
+    }
+    //根据起终点坐标规划步行路线
+    walking.search([116.64861023,39.92165992], [116.646901,39.919333], function(status, result) {
+        // result即是对应的步行路线数据信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_WalkingResult
+        if (status === 'complete') {
+            console.log(result.routes[0].steps)
+            const steps = result.routes[0].steps;
+            steps.forEach((item, index) => {
+                let arr = [];
+                if( item.end_location ) {
+                    // stepsList.push([]);
+                    arr.push([item.end_location.lng, item.end_location.lat]);
+                    // arr[0].push(item.end_location.lng)
+                // const x = CalculationX(item.end_location.lng);
+                // const z = CalculationZ(item.end_location.lat);
+                }
+                if(item.path) {
+                    item.path.forEach((items, index) => {
+                        arr.push([items.lng, items.lat])
+                    })
+                }
+                if( item.start_location ) {
+                    arr.push([item.start_location.lng, item.start_location.lat]);
+                }
+                stepsList.push(arr)
+                // stepsList[index].push(x)
+                // stepsList[index].push(z)
+                // arr.push(item.end_location.lat)
+                // arr.push(item.end_location.lng)
+            });
+            const uuidArr = unid(stepsList);
+            console.log(erwei(uuidArr))
+            // const steps = result.routes[0].steps;
+            // steps.forEach((item, index) => {
+                
+            // });
+            
+        } else {
+            console.log('失败')
+            // log.error('步行路线数据查询失败' + result)
+        } 
+    });    
+    AMap.plugin('AMap.Geolocation', function() {
+        var geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,//是否使用高精度定位，默认:true
+            timeout: 10000,          //超过10秒后停止定位，默认：5s
+            buttonPosition:'RB',    //定位按钮的停靠位置
+            buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+            zoomToAccuracy: true,   //定位成功后是否自动调整地图视野到定位点
+
+        });
+        map.addControl(geolocation);
+        geolocation.getCurrentPosition(function(status,result){
+            if(status=='complete'){
+                onComplete(result)
+            }else{
+                onError(result)
+            }
+        });
+    });
+    //解析定位结果
+    function onComplete(data) {
+        document.getElementById('status').innerHTML='定位成功'
+        var str = [];
+        str.push('定位结果：' + data.position);
+        str.push('定位类别：' + data.location_type);
+        if(data.accuracy){
+             str.push('精度：' + data.accuracy + ' 米');
+        }//如为IP精确定位结果则没有精度信息
+        str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
+        document.getElementById('result').innerHTML = str.join('<br>');
+    }
+    //解析定位错误信息
+    function onError(data) {
+        document.getElementById('status').innerHTML='定位失败'
+        document.getElementById('result').innerHTML = '失败原因排查信息:'+data.message;
+    }
+    // var lnglat = [116.647063,39.920942];
+    // // 返回 3D 坐标系下的 Pixel
+    // var coord = map.lngLatToGeodeticCoord(lnglat);
+    // var pixel = map.lnglatToPixel([116.647063,39.920942], 18); // 返回 Pixel 对象
+    // console.log(coord)
+    // console.log(pixel)
+</script>
+</body>
+</html>

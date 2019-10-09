@@ -7,10 +7,19 @@
 	</style>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=jpf6CUCYACXASQ9tqhA1atGKFkypXlLk"></script>
     <link rel="stylesheet" href="http://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
-    <title>浏览器定位</title>
+	<title>浏览器定位</title>
+	<style>
+	#weizhi	{
+			position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 26px;
+		}
+	</style>
 </head>
 <body>
 	<div id="allmap"></div>
+	<div id="weizhi"></div>
 </body>
 </html>
 <script type="text/javascript">
@@ -25,7 +34,8 @@
 			var mk = new BMap.Marker(r.point);
 			map.addOverlay(mk);
             map.panTo(r.point);
-			alert('您的位置：'+r.point.lng+','+r.point.lat);
+			// alert('您的位置：'+r.point.lng+','+r.point.lat);
+			document.getElementById('weizhi').innerHTML = '您的位置：'+r.point.lng+',<br/>'+r.point.lat; 
 		}
 		else {
 			alert('failed'+this.getStatus());
